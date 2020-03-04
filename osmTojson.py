@@ -32,7 +32,7 @@ if __name__ == '__main__':
     osmfile = r'../files/map.osm'
 
     file_length = -1
-    for file_length, line in enumerate(open(osmfile, 'rU')):
+    for file_length, line in enumerate(open(osmfile, encoding='UTF-8')):
         pass
     file_length += 1
     print("length of the file:\t" + str(file_length))
