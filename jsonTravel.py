@@ -1,12 +1,14 @@
-#random walk on OSM 2.0
+#random walk on OSM 3.0
 #memeory cost is very low; I/O operetions increases
+#now can go back to an earlier node. Random walking based on a tree sturcture.
 
 import json
 import random
 
 
 count=0
-nodeTravled=[];
+nodeTravled=[]
+nodeInCand=[]
 way_route="../files/map.osm_way.json"
 node_route="../files/map.osm_node.json"
 
@@ -30,10 +32,10 @@ def wayInfo(id):
     for line in way_file:
         way = json.loads(line)
         if way["id"] == id:
-            print(" Traveling through the way: " + way["id"])
+            print("Traveling through the way: " + way["id"])
 
             if "tag" in way.keys():
-                print(" Way info: ",way["tag"])
+                print("Way info: ",way["tag"])
     way_file.close()
 
 
@@ -66,9 +68,9 @@ nodeTravled.append(currentNode)
 
 count=count+1
 
+nextCand=[]
+
 while count<100:
-    nextCand=[]
-    end=0
 
     #find all next node we can go
     way_file = open(way_route)
@@ -83,23 +85,28 @@ while count<100:
 
         if flag==1:
             for node in way["nd"]:
-                if node["ref"]!=currentNode and (node["ref"] not in nodeTravled):
+                if node["ref"]!=currentNode and (node["ref"] not in nodeTravled) and (node["ref"] not in nodeInCand):
                     #Through which road to the next node
-                    nextCand.append((way["id"],node["ref"]))
-                    end=1
+                    nextCand.append([currentNode,way["id"],node["ref"]])
+                    nodeInCand.append(node["ref"])
 
-    if end==0:
+    if len(nextCand)==0:
         print("End of the road !!!!!!")
         break
 
     #randomly choose a random node to move to
-    pair = nextCand[random.randint(0,len(nextCand)-1)]
-    wayInfo(pair[0])
-    nodeInfo(pair[1])
-    nodeTravled.append(pair[1])
+    tri = nextCand[random.randint(0,len(nextCand)-1)]
+
+    print("From node: "+tri[0])
+    wayInfo(tri[1])
+    nodeInfo(tri[2])
+
+    nextCand.remove(tri)
+    nodeInCand.remove(tri[2])
+    nodeTravled.append(tri[2])
 
     count=count+1
-    currentNode=pair[1]
+    currentNode=tri[2]
 
     way_file.close()
 
