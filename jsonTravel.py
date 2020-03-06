@@ -1,6 +1,7 @@
-#random walk on OSM 3.0
+#random walk on OSM 4.0
 #memeory cost is very low; I/O operetions increases
 #now can go back to an earlier node. Random walking based on a tree sturcture.
+#the tree has been saved; less space complexity
 
 import json
 import random
@@ -8,7 +9,6 @@ import random
 
 count=0
 nodeTravled=[]
-nodeInCand=[]
 way_route="../files/map.osm_way.json"
 node_route="../files/map.osm_node.json"
 
@@ -64,13 +64,13 @@ startWay=high_way_list[random.randint(0,len(high_way_list)-1)]
 currentNode=startWay["nd"][random.randint(0, len(startWay["nd"]) - 1)]["ref"]
 
 nodeInfo(currentNode)
-nodeTravled.append(currentNode)
+nodeTravled.append([0,startWay["id"],currentNode])
 
 count=count+1
 
 nextCand=[]
 
-while count<100:
+while count<10:
 
     #find all next node we can go
     way_file = open(way_route)
@@ -85,10 +85,17 @@ while count<100:
 
         if flag==1:
             for node in way["nd"]:
-                if node["ref"]!=currentNode and (node["ref"] not in nodeTravled) and (node["ref"] not in nodeInCand):
+                if node["ref"]!=currentNode:
+                    isIn=0
+                    for tri in nextCand:
+                        if(node["ref"]==tri[2]):
+                            isIn=1
+                    for tri in nodeTravled:
+                        if(node["ref"]==tri[2]):
+                            isIn=1
                     #Through which road to the next node
-                    nextCand.append([currentNode,way["id"],node["ref"]])
-                    nodeInCand.append(node["ref"])
+                    if isIn==0:
+                        nextCand.append([currentNode,way["id"],node["ref"]])
 
     if len(nextCand)==0:
         print("End of the road !!!!!!")
@@ -102,13 +109,14 @@ while count<100:
     nodeInfo(tri[2])
 
     nextCand.remove(tri)
-    nodeInCand.remove(tri[2])
-    nodeTravled.append(tri[2])
+    nodeTravled.append(tri)
 
     count=count+1
     currentNode=tri[2]
 
     way_file.close()
+
+#print(nodeTravled)
 
 
 
