@@ -1,16 +1,15 @@
-#random walk on OSM 4.0
+#random walk on OSM 5.0
 #memeory cost is very low; I/O operetions increases
-#now can go back to an earlier node. Random walking based on a tree sturcture.
-#the tree has been saved; less space complexity
+#standard random walking with restart
 
 import json
 import random
 
 
 count=0
-nodeTravled=[]
 way_route="../files/map.osm_way.json"
 node_route="../files/map.osm_node.json"
+restartP=0.15
 
 
 
@@ -40,6 +39,7 @@ def wayInfo(id):
 
 
 #random start, the first way need to be a highway instead of a building
+nodeTravled=[]
 high_way_list=[]
 
 way_file=open(way_route)
@@ -61,16 +61,24 @@ way_file.close()
 
 startWay=high_way_list[random.randint(0,len(high_way_list)-1)]
 
-currentNode=startWay["nd"][random.randint(0, len(startWay["nd"]) - 1)]["ref"]
+startNode=startWay["nd"][random.randint(0, len(startWay["nd"]) - 1)]["ref"]
+currentNode=startNode
 
 nodeInfo(currentNode)
 nodeTravled.append([0,startWay["id"],currentNode])
 
 count=count+1
 
-nextCand=[]
+while count<20:
 
-while count<10:
+    nextCand = []
+
+    p = random.random()
+
+    if(p<=restartP):
+        currentNode = startNode
+        print("Go back to startNode: "+currentNode)
+
 
     #find all next node we can go
     way_file = open(way_route)
@@ -108,7 +116,7 @@ while count<10:
     wayInfo(tri[1])
     nodeInfo(tri[2])
 
-    nextCand.remove(tri)
+    #nextCand.remove(tri)
     nodeTravled.append(tri)
 
     count=count+1
